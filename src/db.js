@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 try {
-	mongoose.connect('mongodb://localhost:27017/hypertexting-test', { useNewUrlParser: true });	
+	mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });	
 }
 catch(error) {
 	console.error(error);
