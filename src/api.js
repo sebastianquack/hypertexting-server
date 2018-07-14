@@ -8,6 +8,7 @@ function init(app, io) {
 	// setup socket api
 	io.on('connection', function(socket) {
 		console.log('user connected');
+		console.log("current room for this socket: " + socket.room);
 
 		socket.on('joinRoom', async function(room) {
 			console.log("signup request for room " + room);
