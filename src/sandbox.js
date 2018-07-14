@@ -21,7 +21,7 @@ module.exports.processMessage = async function(msg, script, callback) {
         justArrived: !msg ? true : false
       },
       api: {
-        output: (msg) => { result.outputs.push(msg); },
+        output: (msg, name="robot") => { result.outputs.push({message: msg, name: name}); },
         moveTo: (room) => { result.moveTo = room; }
       }
     }

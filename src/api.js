@@ -95,6 +95,8 @@ function init(app, io) {
 
 }
 
+const timeout = ms => new Promise(res => setTimeout(res, ms))
+
 async function handleScript(io, socket, currentNode, msg) {
 
 	sandbox.processMessage(msg, currentNode.script, async (result)=>{
@@ -102,9 +104,13 @@ async function handleScript(io, socket, currentNode, msg) {
 			socket.emit('message', {system: true, message: result.error});
 		}
 		if(result.outputs) {
-			result.outputs.forEach((msg)=>{
-				io.in(socket.room).emit('message', {message: msg, name: "robot"});		
-			});
+			await timeout(500); // the robot thinks
+			console.log("transmitting outputs");
+			for(let i = 0; i < result.outputs.length; i++) {
+				io.in(socket.room).emit('message', result.outputs[i]);		
+				await timeout(100 * result.outputs[i].message.length);
+			}
+			console.log("moving on to player movement");
 			if(result.moveTo) {
 				if(!msg) {
 					console.log("move on enter is not allowed");					
