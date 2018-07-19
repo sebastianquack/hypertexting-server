@@ -9,10 +9,14 @@ async function joinRoom(io, socket, room) {
 	// inform others in the new room 
 	socket.room = room;
 	let newNode = await db.findNode(room);
-	socket.emit('message', {system: true, message: "you are now in " + newNode.name});	
-	socket.broadcast.in(socket.room).emit('message', {system: true, message: "a human arrived"});
-	handleScript(io, socket, newNode, null);
-	return socket;
+	if(newNode) {
+		socket.emit('message', {system: true, message: "you are now in " + newNode.name});	
+		socket.broadcast.in(socket.room).emit('message', {system: true, message: "a human arrived"});
+		handleScript(io, socket, newNode, null);
+	} else {
+		console.log("room " + room + " not found!");
+	}
+	
 }
 
 function init(app, io) {
