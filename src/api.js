@@ -3,12 +3,30 @@ var bodyParser = require('body-parser')
 const sandbox = require('./sandbox.js');
 const db = require('./db.js');
 
+async function joinRoom(io, socket, room) {
+	console.log("joining " + room);
+	await socket.join(room);
+	// inform others in the new room 
+	socket.room = room;
+	let newNode = await db.findNode(room);
+	socket.emit('message', {system: true, message: "you are now in " + newNode.name});	
+	socket.broadcast.in(socket.room).emit('message', {system: true, message: "a human arrived"});
+	handleScript(io, socket, newNode, null);
+	return socket;
+}
+
 function init(app, io) {
 
 	// setup socket api
 	io.on('connection', function(socket) {
-		console.log('user connected');
+		console.log('Client connected');
 		console.log("current room for this socket: " + socket.room);
+		if(socket.handshake.query.currentRoomId && !socket.room) {
+			console.log("query param found, rejoining room...");
+			joinRoom(io, socket, socket.handshake.query.currentRoomId);
+		}
+
+		socket.on('disconnect', () => console.log('Client disconnected'));
 
 		socket.on('joinRoom', async function(room) {
 			console.log("signup request for room " + room);
@@ -22,14 +40,7 @@ function init(app, io) {
 			}
 			// check if room needs to be changed
 			if(socket.room != room) {
-				console.log("joining " + room);
-				await socket.join(room);
-				// inform others in the new room 
-				socket.room = room;
-				let newNode = await db.findNode(room);
-				socket.emit('message', {system: true, message: "you are now in " + newNode.name});	
-				socket.broadcast.in(socket.room).emit('message', {system: true, message: "a human arrived"});
-				handleScript(io, socket, newNode, null);
+				joinRoom(io, socket, room);
 			}
 			
     	});
