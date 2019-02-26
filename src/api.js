@@ -121,12 +121,10 @@ async function handleScript(io, socket, currentNode, msg) {
 		}
 		if(result.outputs) {
 			await timeout(500); // the robot thinks
-			console.log("transmitting outputs");
 			for(let i = 0; i < result.outputs.length; i++) {
 				io.in(socket.room).emit('message', result.outputs[i]);		
 				await timeout(100 * result.outputs[i].message.length);
 			}
-			console.log("moving on to player movement");
 			if(result.moveTo) {
 				if(!msg) {
 					console.log("move on enter is not allowed");					
